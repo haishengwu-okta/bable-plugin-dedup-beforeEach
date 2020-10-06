@@ -15,11 +15,12 @@ function getBeforeEachBody(t, value) {
 module.exports = function({types: t }) {
   return {
     visitor: {
-      BlockStatement(path) {
-        // console.log(path.type);
+      BlockStatement(path, state) {
         const beforeEachExp = path.node.body.filter(isBeforeEach.bind(this, t));
         if (beforeEachExp.length >= 2) {
-          const otherBeforeEach = beforeEachExp.slice(0, beforeEachExp.length-1);
+          state.opts.ignore = false;
+          console.log('Found 2+ beforeEach', state.opts);
+        const otherBeforeEach = beforeEachExp.slice(0, beforeEachExp.length-1);
 
           let otherBodys = [];
           otherBeforeEach.forEach(exp => {

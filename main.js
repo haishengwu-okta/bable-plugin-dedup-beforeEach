@@ -1,50 +1,61 @@
 const fs = require('fs');
 const path = require('path');
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const program = require('commander');
 const glob = require('glob');
+const prettier = require('prettier');
 
 const pDeDupBeforeEach = require('./src/index');
 
 function convert(filePath, options) {
   // read the code from this file
   const context = fs.readFileSync(filePath, 'utf-8');
-  const fileName = path.basename(filePath, '.js');
-  // convert from a buffer to a string
 
   // use our plugin to transform the source
+  let state = { ignore: true };
   let result = babel.transform(context, {
     plugins: [
-      pDeDupBeforeEach,
+      "@babel/plugin-syntax-object-rest-spread",
+      [pDeDupBeforeEach, state],
     ],
   });
-
-  result = result.code;
 
   if (options.dryrun) {
     return;
   }
 
-  if (options.modify) {
-    fs.writeFileSync(filePath, result);
-  } else {
-    console.log(result);
+  if (state.ignore === false) {
+    console.log(`Processing ${filePath}`);
+    result = prettier.format(result.code, {
+      useTabs: false,
+      printWidth: 120,
+      tabWidth: 2,
+      singleQuote: true,
+      trailingComma: 'es5',
+      bracketSpacing: true,
+      parser: 'babel',
+      semi: true,
+    });
+
+    if (options.modify) {
+      fs.writeFileSync(filePath, result);
+    } else {
+      console.log(result);
+    }
   }
+
 };
 
 function main() {
   program
     .option('-p --path <path>',
-            'target file or directory to be converted.')
+      'target file or directory to be converted.')
     .option('-m --modify',
-            'modify target file(s) in place. Default to False.',
-            false)
-    .option('-v --verbose',
-            'display extra processing informations',
-            false)
+      'modify target file(s) in place. Default to False.',
+      false)
     .option('-d --dryrun',
-            'nothing actual changes will happen',
-            false)
+      'nothing actual changes will happen',
+      false)
     .parse(process.argv);
 
   if (!program.path) {
@@ -69,9 +80,6 @@ function main() {
   let failure = 0;
 
   inputFiles.forEach((srcFile) => {
-    if (program.verbose) {
-      console.log(`Processing ${srcFile}`);
-    }
     try {
       convert(srcFile, {
         dryrun: program.dryrun,
