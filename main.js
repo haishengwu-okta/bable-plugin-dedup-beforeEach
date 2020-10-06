@@ -39,9 +39,6 @@ function main() {
     .option('-m --modify',
             'modify target file(s) in place. Default to False.',
             false)
-    .option('-e --classtoextend',
-            'convert ES6 class to backbone extend',
-            false)
     .option('-v --verbose',
             'display extra processing informations',
             false)

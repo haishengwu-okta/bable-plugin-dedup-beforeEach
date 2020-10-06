@@ -24,7 +24,6 @@ module.exports = function({types: t }) {
           let otherBodys = [];
           otherBeforeEach.forEach(exp => {
             const b = getBeforeEachBody(t, exp);
-            console.log("111", b);
             otherBodys = otherBodys.concat(b);
           });
 
