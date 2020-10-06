@@ -21,7 +21,6 @@ function convert(filePath, options) {
   });
 
 
-
   if (state.ignore === false) {
     console.log(`Processing ${filePath}`);
     if (options.dryrun) {
